@@ -375,7 +375,9 @@ public class PointThreeEstimator {
         }
 
         if (player.uncertaintyHandler.wasAffectedByStuckSpeed() && player.isPointThree()) {
-            return true;
+            if (player.actualMovement.lengthSquared() < 0.002) {
+                return true;
+            }
         }
 
         boolean isModern = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_18_2);
