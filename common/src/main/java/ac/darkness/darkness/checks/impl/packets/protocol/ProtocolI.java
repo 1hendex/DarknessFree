@@ -1,0 +1,68 @@
+package ac.darkness.darkness.checks.impl.packets.protocol;
+
+import ac.darkness.darkness.checks.Check;
+import ac.darkness.darkness.checks.CheckData;
+import ac.darkness.darkness.checks.type.PostPredictionListener;
+import ac.darkness.darkness.checks.type.PreViaPacketReceiveListener;
+import ac.darkness.darkness.player.GrimPlayer;
+import ac.darkness.darkness.utils.anticheat.update.PredictionComplete;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientEntityAction;
+import org.jetbrains.annotations.NotNull;
+
+@CheckData(name = "ProtocolI", alternativeName = "PacketOrderH", configName = "ProtocolI", stableKey = "grim.packetorder.sneak_sprint_order", description = "Sent sprinting and sneaking state changes in an invalid packet order", experimental = true)
+public class ProtocolI extends Check implements PreViaPacketReceiveListener, PostPredictionListener {
+
+    private int invalid;
+
+    public ProtocolI(final GrimPlayer player) {
+        super(player);
+    }
+
+    @Override
+    public boolean isApplicable() {
+        // sneaking is set by input packet in 1.21.6+
+        return player.getClientVersion().isOlderThan(ClientVersion.V_1_21_6);
+    }
+
+    @Override
+    public void onPreViaPacketReceive(@NotNull PacketReceiveEvent event) {
+        if (event.getPacketType() == PacketType.Play.Client.ENTITY_ACTION) {
+            switch (new WrapperPlayClientEntityAction(event).getAction()) {
+                case START_SPRINTING, STOP_SPRINTING -> {
+                    if (player.getClientVersion().isOlderThan(ClientVersion.V_1_21_2) && player.protocolProcessor.isSneaking()) {
+                        if (!player.canSkipTicks()) {
+                            flag();
+                        } else {
+                            invalid++;
+                        }
+                    }
+                }
+                case START_SNEAKING, STOP_SNEAKING -> {
+                    if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_21_2) && player.protocolProcessor.isSprinting()) {
+                        if (!player.canSkipTicks()) {
+                            flag();
+                        } else {
+                            invalid++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onPredictionComplete(PredictionComplete predictionComplete) {
+        if (!player.canSkipTicks()) return;
+
+        if (player.isTickingReliablyFor(3)) {
+            for (; invalid >= 1; invalid--) {
+                flag();
+            }
+        }
+
+        invalid = 0;
+    }
+}

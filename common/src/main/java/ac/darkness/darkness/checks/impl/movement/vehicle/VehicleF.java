@@ -1,0 +1,71 @@
+package ac.darkness.darkness.checks.impl.movement.vehicle;
+
+import ac.grim.grimac.api.storage.verbose.Verbose;
+import ac.darkness.darkness.checks.Check;
+import ac.darkness.darkness.checks.CheckData;
+import ac.darkness.darkness.checks.type.PacketReceiveListener;
+import ac.darkness.darkness.player.GrimPlayer;
+import ac.darkness.darkness.utils.data.KnownInput;
+import ac.darkness.darkness.utils.data.packetentity.PacketEntity;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientSteerBoat;
+
+@CheckData(name = "VehicleF", stableKey = "grim.vehicle.boat_input_mismatch", experimental = true, description = "Sent incorrect boat paddle states")
+public class VehicleF extends Check implements PacketReceiveListener {
+    private static final Verbose V =
+            Verbose.of("sent=({bool}, {bool}), expected=({bool}, {bool})");
+
+    public VehicleF(GrimPlayer player) {
+        super(player);
+    }
+
+    @Override
+    public boolean isApplicable() {
+        return player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_9);
+    }
+
+    private PacketEntity lastTickVehicle;
+
+    @Override
+    public void onPacketReceive(final PacketReceiveEvent event) {
+        if (event.getPacketType() == PacketType.Play.Client.STEER_BOAT) {
+            // lastVehicleSwitch isn't updated by this time.
+            if (lastTickVehicle != player.getVehicle()) return;
+
+            WrapperPlayClientSteerBoat packet = new WrapperPlayClientSteerBoat(event);
+
+            boolean expectedLeft;
+            boolean expectedRight;
+
+            if (player.supportsEndTickPreVia()) {
+                KnownInput input = player.packetStateData.knownInput;
+                expectedLeft = input.forward() || !input.left() && input.right();
+                expectedRight = input.forward() || input.left() && !input.right();
+            } else {
+                expectedLeft = player.vehicleData.nextVehicleForward > 0 || player.vehicleData.nextVehicleHorizontal < 0;
+                expectedRight = player.vehicleData.nextVehicleForward > 0 || player.vehicleData.nextVehicleHorizontal > 0;
+
+                if (player.vehicleData.nextVehicleForward == 0 && packet.isLeftPaddleTurning() && packet.isRightPaddleTurning()) {
+                    return; // the player is pressing forward and backward
+                }
+            }
+
+            if (packet.isLeftPaddleTurning() != expectedLeft || packet.isRightPaddleTurning() != expectedRight) {
+                boolean sentLeft = packet.isLeftPaddleTurning();
+                boolean sentRight = packet.isRightPaddleTurning();
+                if (flag(V.write(verbose()).bool(sentLeft).bool(sentRight).bool(expectedLeft).bool(expectedRight))
+                    && shouldModifyPackets()) {
+                    packet.setLeftPaddleTurning(expectedLeft);
+                    packet.setRightPaddleTurning(expectedRight);
+                    event.markForReEncode(true);
+                }
+            }
+        }
+
+        if (isTickPacket(event.getPacketType())) {
+            lastTickVehicle = player.getVehicle();
+        }
+    }
+}

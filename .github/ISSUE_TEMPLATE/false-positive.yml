@@ -1,0 +1,54 @@
+name: False positive
+description: Report a **NON-SIMULATION** related false positive here
+labels: ["false positive"]
+body:
+  - type: textarea
+    attributes:
+      label: Describe the false positive and how to replicate it
+      description: |
+        Video is always useful.
+        Use /grim verbose to get debug information from the failing check.
+        A minimally reproducible description is best.
+      placeholder: |
+        Step 1. Do this
+        Step 2. Then do this
+        Step 3. etc...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Grim version
+      description: |
+        Provide the version of Grim running on the server. You can run `/grim version` to check.
+      placeholder: Examples include 2.3.73-8ddd7f1, 2.3.72, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Server version
+      description: |
+        Run `/version` on your server to check. Provide both the server type (ie Paper, Airplane, etc) & the Minecraft version.
+      placeholder: Paper 1.21.11
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Client version
+      description: |
+        Provide the version of your Minecraft client. You must be able to reproduce the false positive using a vanilla client.
+        Using Lunar Client, TLauncher, Fabric, etc, will result in your issue being closed.
+      placeholder: Vanilla 26.1
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Plugins/Mods
+      description: |
+        List all plugins or mods installed on your server. To list plugins on Bukkit-based servers, run `/plugins`.
+        If your server is behind a proxy such as Bungeecord, you should list the proxy's plugins as well.
+    validations:
+      required: true

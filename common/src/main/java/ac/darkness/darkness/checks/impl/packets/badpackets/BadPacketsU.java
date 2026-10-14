@@ -1,0 +1,70 @@
+package ac.darkness.darkness.checks.impl.packets.badpackets;
+
+import ac.grim.grimac.api.storage.verbose.Verbose;
+import ac.darkness.darkness.checks.Check;
+import ac.darkness.darkness.checks.CheckData;
+import ac.darkness.darkness.checks.type.PreViaPacketReceiveListener;
+import ac.darkness.darkness.player.GrimPlayer;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.item.ItemStack;
+import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.util.Vector3f;
+import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerBlockPlacement;
+import org.jetbrains.annotations.NotNull;
+
+@CheckData(name = "BadPacketsU", stableKey = "grim.badpackets.invalid_block_placement", description = "Sent impossible use item packet")
+public class BadPacketsU extends Check implements PreViaPacketReceiveListener {
+    private static final Verbose V =
+            Verbose.of("xyz={mcpos}, cursor={cursor}, item={bool}");
+
+    public BadPacketsU(GrimPlayer player) {
+        super(player);
+    }
+
+    @Override
+    public boolean isApplicable() {
+        return player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8);
+    }
+
+    @Override
+    public void onPreViaPacketReceive(@NotNull PacketReceiveEvent event) {
+        if (event.getPacketType() != PacketType.Play.Client.PLAYER_BLOCK_PLACEMENT) return;
+        final WrapperPlayClientPlayerBlockPlacement packet = new WrapperPlayClientPlayerBlockPlacement(event);
+        // face 255 is USE_ITEM for pre 1.9
+        if (packet.getFaceId() != 255) return;
+
+        // This packet is always sent at (-1, -1, -1) at (0, 0, 0) on the block
+        // except y gets wrapped on 1.7
+        final int expectedY = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_8) ? -1 : 255;
+
+        final boolean failedItemCheck = isEmpty(packet.getItemStack().orElse(null));
+
+        final Vector3i pos = packet.getBlockPosition();
+        final Vector3f cursor = packet.getCursorPosition();
+
+        if (failedItemCheck
+                || pos.x != -1
+                || pos.y != expectedY
+                || pos.z != -1
+                || cursor.x != 0
+                || cursor.y != 0
+                || cursor.z != 0
+        ) {
+            var buf = V.write(verbose())
+                    .mcPos(pos.x, pos.y, pos.z)
+                    .cursor(cursor.x, cursor.y, cursor.z)
+                    .bool(!failedItemCheck);
+            if (flag(buf) && shouldModifyPackets()) {
+                player.onPacketCancel();
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    private static boolean isEmpty(ItemStack itemStack) {
+        return itemStack == null || itemStack.getType() == null || itemStack.getType() == ItemTypes.AIR;
+    }
+}

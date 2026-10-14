@@ -1,0 +1,226 @@
+# \u00BB is » (double >>), ANSI and UTF-8 interpret this differently... you may even see ? due to this
+prefix: "&x&8&8&0&0&0&0&l&oD&x&A&C&0&2&0&2&l&oa&x&C&F&0&4&0&4&l&or&x&E&F&0&3&0&3&l&ok&x&D&E&0&2&0&2&l&on&x&9&C&0&0&0&0&l&oe&x&7&D&0&0&0&0&l&os&x&6&A&0&0&0&0&l&os §8|"
+
+alerts-enabled: "%prefix% &fAlerts enabled"
+alerts-disabled: "%prefix% &fAlerts disabled"
+verbose-enabled: "%prefix% &fVerbose enabled"
+verbose-disabled: "%prefix% &fVerbose disabled"
+brands-enabled: "%prefix% &fBrands enabled"
+brands-disabled: "%prefix% &fBrands disabled"
+client-brand-format: "%prefix% &f%player% joined using %brand%"
+console-specify-target: "%prefix% &cYou must specify a target as the console!"
+reloading: "%prefix% &7Reloading config..."
+reloaded: "%prefix% &fConfig has been reloaded."
+reload-failed: "%prefix% &cFailed to reload config."
+player-not-found: "%prefix% &cPlayer is exempt or offline!"
+player-not-this-server: "%prefix% &cPlayer is not on this server!"
+sender-not-found: "%prefix% &cYou cannot be exempt to use this command!"
+spectate-return: "<click:run_command:/darkness stopspectating><hover:show_text:\"/darkness stopspectating\">\n%prefix% &fClick here to return to previous location\n</hover></click>"
+cannot-spectate-return: "%prefix% &cYou can only do this after spectating a player"
+cannot-run-on-self: "%prefix% &cYou cannot use this command on yourself!"
+upload-log: "%prefix% &fUploaded debug to: %url%"
+upload-log-start: "%prefix% &fUploading log... please wait"
+upload-log-not-found: "%prefix% &cUnable to find that log"
+upload-log-upload-failure: "%prefix% &cSomething went wrong while uploading this log, see console for more info"
+disconnect:
+    timeout: "<lang:disconnect.timeout>"
+    closed: "<lang:disconnect.closed>"
+    error: "<red>An error occurred whilst processing packets. Please contact the administrators."
+    blacklisted-forge: "<red>Your forge version is blacklisted due to inbuilt reach hacks.<newline><gold>Versions affected: 1.18.2-1.19.3<newline><newline><red>Please see https://github.com/MinecraftForge/MinecraftForge/issues/9309."
+run-as-player: "%prefix% &cThis command can only be used by players!"
+run-as-player-or-console: "%prefix% &cThis command can only be used by players or the console!"
+webhook-not-enabled: "Discord webhooks are not enabled!"
+webhook-test-message: "test message"
+webhook-test-succeeded: "Discord webhook test succeeded!"
+webhook-test-failed: "Discord webhook test failed!"
+
+bar:
+    opening_bracket: '&8['
+    closing_bracket: '&8]'
+    fill: '&f|'
+    empty: '&7|'
+    size: 18
+
+# Valid placeholders:
+# %prefix%
+# %player%
+# %check%
+# %check_name%
+# %check_type%
+# %trust_color%
+# %trust_name%
+# %max_vl%
+# %description%
+# %information%
+# %version%
+# %ping%
+# %tps%
+# %experimental%
+# %vl% - violations
+# %bar% - number of violations shown as bars
+# %verbose% - extra information from the check such as offsets, not all checks will add information
+alerts_format: "%prefix% &c%player% &7failed &c%check_name%%experimental% &7(x&c%bar%&7)"
+alerts-format: "%prefix% &c%player% &7failed &c%check_name%%experimental% &7(x&c%bar%&7)"
+alerts_format_console: "%prefix% &c%player% &7failed &c%check_name%%experimental% &7(x&c%vl%&7) &c%verbose%"
+alerts-format-console: "%prefix% &c%player% &7failed &c%check_name%%experimental% &7(x&c%vl%&7) &c%verbose%"
+alerts_format_proxy: "%prefix% &f[&cPROXY&f] &f%player% &7failed &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cPROXY&f] &f%player% &7failed &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+experimental_symbol: " (Experimental)"
+experimental-symbol: " (Experimental)"
+
+alert_hover_enabled: true
+alert_hover_command: "/darkness spectate %player%"
+alert_hover:
+    - '&7Description:&r'
+    - '&c%description%'
+    - ' '
+    - '&7Information:&r'
+    - '&c%information%'
+    - ' '
+    - '&7Version: &c&r%version%'
+    - ' '
+    - '&7Ping: &c&r%ping%'
+    - ' '
+    - '&7TPS: &c&r%tps%'
+    - ' '
+    - '&cClick to start spectating'
+
+profile:
+  - ' '
+  - '%prefix%'
+  - ' '
+  - '&8» &7Player Profile: &f%player%'
+  - '&8» &7Lag Status: &f%lagstatus%'
+  - '&8» &7Ping: &f%ping%'
+  - '&8» &7Version: &f%version%'
+  - '&8» &7Client: &f%brand%'
+  - '&8» &7Horizontal sensitivity: &f%h_sensitivity%%'
+  - '&8» &7Vertical sensitivity: &f%v_sensitivity%%'
+  - '&8» &7Fast math: &f%fast_math%'
+  - ' '
+
+profile_command:
+  - ' '
+  - '%prefix%'
+  - ' '
+  - '&8» &7Player Profile: &f%player%'
+  - '&8» &7Lag Status: &f%lagstatus%'
+  - '&8» &7Ping: &f%ping%'
+  - '&8» &7Version: &f%version%'
+  - '&8» &7Client: &f%brand%'
+  - '&8» &7Horizontal sensitivity: &f%h_sensitivity%%'
+  - '&8» &7Vertical sensitivity: &f%v_sensitivity%%'
+  - '&8» &7Fast math: &f%fast_math%'
+  - ' '
+
+help:
+  - ' '
+  - '%prefix% &7List of available Darkness commands'
+  - ' '
+  - '&8» &c/darkness alerts &f- &7Enable/disable alerts.'
+  - '&8» &c/darkness brands &f- &7Toggle client brand notifications.'
+  - '&8» &c/darkness profile <player> &f- &7View player information.'
+  - '&8» &c/darkness help &f- &7View the list of available commands.'
+  - '&8» &c/darkness checks &f- &7View all active Darkness checks.'
+  - '&8» &c/darkness debug <player> &f- &7Developer debug with prediction.'
+  - '&8» &c/darkness perf &f- &7Performance indicator (ms/prediction).'
+  - '&8» &c/darkness reload &f- &7Reload configuration.'
+  - '&8» &c/darkness spectate <player> &f- &7Spectate player.'
+  - '&8» &c/darkness verbose &f- &7Show all flags without buffers.'
+  - '&8» &c/darkness log [0-255] &f- &7Upload prediction debug log.'
+  - '&8» &c/darkness history <player> &f- &7View player violation and session history.'
+  - ' '
+
+checks_command:
+  space: ' '
+  type_space: ' '
+  type: "&8» &7Check Category: &f%checkType%"
+  not_found_total: "&8» &cNo checks found."
+  not_found_type: "&8» &cNone."
+  separator: "&7, "
+  check_not_found: "%prefix% &cCheck &7'%check%' &cnot found!"
+  check_enabled: "%prefix% &fCheck &a%check% &fhas been &aenabled&f!"
+  check_disabled: "%prefix% &fCheck &c%check% &fhas been &cdisabled&f!"
+  check_already_enabled: "%prefix% &fCheck &a%check% &fis already &aenabled&f!"
+  check_already_disabled: "%prefix% &fCheck &c%check% &fis already &cdisabled&f!"
+  check:
+    enabled: "&a%checkName%%experimental%"
+    disabled: "&c%checkName%%experimental%"
+    exempted: "&e%checkName%%experimental%"
+
+
+# === /grim history ===
+# Session-based history UI. All lines below are configurable MiniMessage templates.
+# Default row hovers live in inline <hover:show_text:'...'> tags and the hover
+# fragment keys below; remove the inline hover to use the renderer fallback.
+
+grim-history-load-failure: "%prefix% &cHistory subsystem failed to load! Check server console for errors."
+grim-history-disabled: "%prefix% &cHistory subsystem is disabled!"
+grim-history-failed: "%prefix% &cFailed to load history: &7%error%"
+grim-history-unknown-player: "%prefix% &cUnknown player: &f%player%"
+grim-history-no-sessions: "%prefix% &7No session history for &f%player%&7."
+grim-history-session-not-found: "%prefix% &cSession &f%ordinal%&c not found for &f%player%&c."
+
+# Session list — valid placeholders: %prefix% %player% %page% %max_pages%
+grim-history-header: "%prefix% &bShowing session history for &f%player% &8[&f%page%&7/&f%max_pages%&8]"
+# Single session summary line — valid placeholders:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %crashed_marker% %session_uuid% %detail_command%
+# %crashed_marker% expands to grim-history-crashed-marker for sessions
+# whose connection went away without a graceful close (server crash,
+# kill -9, channel RST that didn't fire UserDisconnectEvent). Empty
+# string for ongoing or gracefully-closed sessions.
+grim-history-session: "<hover:show_text:'&bSession &7%session_uuid%<newline>&7Click or run &e%detail_command%<newline>&7to view session details.'>%prefix% &8[&b%grim_version%&8] &8[&b%server_name%&8] &8[&b%client_version%&8] &bSession &f%ordinal%&b duration &f%duration%&b with &c%violations%&b violations &8[&c%unique_checks%&8]%crashed_marker% &8(&7%timeago% ago&8)</hover>"
+
+# Inline marker substituted into %crashed_marker% on session lines whose
+# closed_at == last_activity (i.e. stamped by the next-boot crash sweep
+# rather than the disconnect path). Includes a leading space so the
+# marker reads naturally when present and disappears when empty.
+grim-history-crashed-marker: " &8(&ccrashed&8)"
+
+# Session detail — valid placeholders:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %bucket_size%
+grim-history-detail-header: "%prefix% &bShowing &f%player%&b's session &f%ordinal%&b details:"
+grim-history-detail-meta1: "%prefix% &bDarknessFree: &f%grim_version%&b, Server: &f%server_name%&b, Duration: &f%duration%&b, Date: &7%timeago% ago"
+grim-history-detail-meta2: "%prefix% &bClient: &f%client_version%&b, Brand: &f%client_brand%"
+grim-history-detail-violations-header: "%prefix% &bViolations: &8(%violations% total, %unique_checks% unique)"
+grim-history-detail-empty: "%prefix% &7- (none)"
+# A grouped row (default) — valid placeholders: %prefix% %offset% %checks_list%
+#   %bucket_start% %bucket_end% %bucket_hover_entries%
+#   %checks_list% is built by joining grim-history-check-count entries with ", "
+grim-history-detail-group: "<hover:show_text:'&bViolations in &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%'>%prefix% &7- %checks_list% &8(&b%offset%&8)</hover>"
+grim-history-detail-group-hover: "&bViolations in &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%"
+grim-history-detail-group-hover-entry: "<newline>&8  %offset% &b%check%%description%%verbose%"
+grim-history-hover-description: " — &f%description%"
+grim-history-detail-group-hover-verbose: " — &7%verbose%"
+# A single raw violation row (--detailed) — valid placeholders:
+#   %prefix% %offset% %check% %description% %vl% %verbose%
+grim-history-detail-entry: "%prefix% &7- &f%check% &8(&b%offset%&8)&7 %verbose%"
+grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% — vl %vl%%verbose%"
+grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
+# Inner format for each check in a group's %checks_list% — valid placeholders: %check_name% %count%
+grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+checks_command:
+  space: ' '
+  type_space: ' '
+  type: "&8» &7Check Category: &f%checkType%"
+  not_found_total: "&8» &cChecks not found."
+  not_found_type: "&8» &cNone."
+  separator: "&7, "
+  check_not_found: "%prefix% &cCheck &7'%check%' &cnot found!"
+  check_enabled: "%prefix% &fCheck &a%check% &fwas &aenabled&f!"
+  check_disabled: "%prefix% &fCheck &c%check% &fwas &cdisabled&f!"
+  check_already_enabled: "%prefix% &fCheck &a%check% &fis already &aenabled&f!"
+  check_already_disabled: "%prefix% &fCheck &c%check% &fis already &cdisabled&f!"
+  check:
+    enabled: "&a%checkName%%experimental%"
+    disabled: "&c%checkName%%experimental%"
+    exempted: "&e%checkName%%experimental%"
+
+# Schema markers — see header comment in config.yml.
+config-flavor: V2
+config-version: 2

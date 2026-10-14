@@ -1,0 +1,416 @@
+// This file was designed and is an original check for DarknessFreeBukkitLoaderPlugin
+// Copyright (C) 2021 DefineOutside
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+package ac.darkness.darkness.utils.data;
+
+import ac.darkness.darkness.player.GrimPlayer;
+import ac.darkness.darkness.utils.collisions.datatypes.CollisionBox;
+import ac.darkness.darkness.utils.collisions.datatypes.NoCollisionBox;
+import ac.darkness.darkness.utils.collisions.datatypes.SimpleCollisionBox;
+import ac.darkness.darkness.utils.data.packetentity.PacketEntity;
+import ac.darkness.darkness.utils.nmsutil.GetBoundingBox;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.manager.server.ServerVersion;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.util.Vector3d;
+import org.jetbrains.annotations.Nullable;
+
+// You may not copy the check unless you are licensed under GPL
+public class ReachInterpolationData {
+    private final SimpleCollisionBox targetLocation;
+    /**
+     * The exact position this interpolation is heading towards, or null when this
+     * interpolation targets a box rather than a tracked position (the riding and
+     * MC-255263 freeze constructor). Kept separate from {@link #targetLocation}
+     * because that box is expanded for < 1.9 packet precision loss.
+     */
+    private final Vector3d targetPosition;
+    private final GrimPlayer player;
+    private final PacketEntity entity;
+    public SimpleCollisionBox startingLocation;
+    private int interpolationStepsLowBound = 0;
+    private int interpolationStepsHighBound = 0;
+    private int interpolationSteps = 1;
+    private boolean expandNonRelative = false;
+
+    public ReachInterpolationData(GrimPlayer player, SimpleCollisionBox startingLocation, TrackedPosition position, PacketEntity entity) {
+        final boolean unreliableTicking = !player.inVehicle() && player.canSkipTicks();
+
+        this.startingLocation = startingLocation;
+        final Vector3d pos = position.getPos();
+        this.targetLocation = new SimpleCollisionBox(pos.x, pos.y, pos.z, pos.x, pos.y, pos.z, false);
+        this.targetPosition = pos;
+        this.player = player;
+        this.entity = entity;
+
+        // 1.9 -> 1.8 precision loss in packets
+        // (ViaVersion is doing some stuff that makes this code difficult)
+        if (player.getClientVersion().isOlderThan(ClientVersion.V_1_9) && PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_9)) {
+            targetLocation.expand(0.03125);
+        }
+
+        if (entity.isBoat) {
+            interpolationSteps = 10;
+        } else if (entity.isMinecart) {
+            interpolationSteps = 5;
+        } else if (entity.getType() == EntityTypes.SHULKER) {
+            interpolationSteps = 1;
+        } else if (entity.isLivingEntity) {
+            interpolationSteps = 3;
+        } else {
+            interpolationSteps = 1;
+        }
+
+        // If the player doesn't tick reliably, their interpolation is anywhere between min and max steps.
+        if (unreliableTicking) interpolationStepsHighBound = getInterpolationSteps();
+    }
+
+    // While riding entities, there is no interpolation.
+    public ReachInterpolationData(GrimPlayer player, SimpleCollisionBox finishedLoc, PacketEntity entity) {
+        this.startingLocation = finishedLoc;
+        this.targetLocation = finishedLoc;
+        this.targetPosition = null;
+        this.entity = entity;
+        this.player = player;
+    }
+
+    public static SimpleCollisionBox combineCollisionBox(SimpleCollisionBox one, SimpleCollisionBox two) {
+        double minX = Math.min(one.minX, two.minX);
+        double maxX = Math.max(one.maxX, two.maxX);
+        double minY = Math.min(one.minY, two.minY);
+        double maxY = Math.max(one.maxY, two.maxY);
+        double minZ = Math.min(one.minZ, two.minZ);
+        double maxZ = Math.max(one.maxZ, two.maxZ);
+
+        return new SimpleCollisionBox(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    public static CollisionBox getOverlapHitbox(CollisionBox b1, CollisionBox b2) {
+        if (b1 == NoCollisionBox.INSTANCE || b2 == NoCollisionBox.INSTANCE) {
+            return NoCollisionBox.INSTANCE;
+        } else if (!(b1 instanceof SimpleCollisionBox) || !(b2 instanceof SimpleCollisionBox)) {
+            throw new IllegalArgumentException("Both b1 and b2 must be SimpleCollisionBox instances");
+        }
+
+        SimpleCollisionBox box1 = (SimpleCollisionBox) b1;
+        SimpleCollisionBox box2 = (SimpleCollisionBox) b2;
+
+        // Calculate the potential overlap along each axis
+        double overlapMinX = Math.max(box1.minX, box2.minX);
+        double overlapMaxX = Math.min(box1.maxX, box2.maxX);
+        double overlapMinY = Math.max(box1.minY, box2.minY);
+        double overlapMaxY = Math.min(box1.maxY, box2.maxY);
+        double overlapMinZ = Math.max(box1.minZ, box2.minZ);
+        double overlapMaxZ = Math.min(box1.maxZ, box2.maxZ);
+
+        // Check if there's actual overlap along each axis
+        if (overlapMinX > overlapMaxX || overlapMinY > overlapMaxY || overlapMinZ > overlapMaxZ) {
+            return NoCollisionBox.INSTANCE; // No overlap, return null or an appropriate "empty" box representation
+        }
+
+        // Return the overlapping hitbox
+        return new SimpleCollisionBox(overlapMinX, overlapMinY, overlapMinZ, overlapMaxX, overlapMaxY, overlapMaxZ);
+    }
+
+    private int getInterpolationSteps() {
+        return interpolationSteps;
+    }
+
+    /**
+     * Equivalent of vanilla's {@code InterpolationHandler#hasActiveInterpolation}.
+     * <p>
+     * Uses the low bound so this is only true while every position the client could
+     * be at is still short of the target. Once the low bound has reached the step
+     * count the entity has converged, and restarting the interpolation is a no-op
+     * anyway because the new starting location would equal the target.
+     */
+    public boolean hasActiveInterpolation() {
+        return interpolationStepsLowBound < getInterpolationSteps();
+    }
+
+    /**
+     * Whether an incoming position/rotation update restates the target this
+     * interpolation is already heading towards.
+     * <p>
+     * Mirrors the guard in vanilla {@code InterpolationHandler#interpolateTo}: a
+     * component the packet did not carry is compared against the current target
+     * (vanilla defaults it through {@code Entity#moveOrInterpolateTo}'s
+     * {@code Optional#orElse}), so it can never force a restart on its own.
+     *
+     * @param pos        the position the update targets
+     * @param xRot       packet yaw, or null when the packet carried no rotation
+     * @param yRot       packet pitch, or null when the packet carried no rotation
+     * @param targetXRot yaw this interpolation is heading towards
+     * @param targetYRot pitch this interpolation is heading towards
+     */
+    public boolean restatesTarget(Vector3d pos, @Nullable Float xRot, @Nullable Float yRot,
+                                  float targetXRot, float targetYRot) {
+        if (targetPosition == null || !hasActiveInterpolation()) return false;
+        if (targetPosition.x != pos.x
+                || targetPosition.y != pos.y
+                || targetPosition.z != pos.z) {
+            return false;
+        }
+
+        // Vanilla compares boxed Floats here, so exact equality is the correct test.
+        return xRot == null || yRot == null || (targetXRot == xRot && targetYRot == yRot);
+    }
+
+    /**
+     * Calculates a bounding box that contains all possible positions where the entity could be located
+     * during interpolation. This takes into account:<p>
+     * • The starting position<br>
+     * • The target position<br>
+     * • The number of interpolation steps<br>
+     * • The current interpolation progress (low and high bounds)<p>
+     * <p>
+     * To avoid expensive branching when bruteforcing interpolation, this method combines
+     * the collision boxes for all possible steps into a single bounding box. This approach
+     * was specifically designed to handle the uncertainty of minimum interpolation,
+     * maximum interpolation, and target location on 1.9+ clients while still supporting 1.7-1.8.<p>
+     * <p>
+     * For each possible interpolation step between the bounds, it calculates the position
+     * and combines all these positions into a single bounding box that encompasses all of them.
+     *
+     * @return A SimpleCollisionBox containing all possible positions of the entity during interpolation
+     */
+    public SimpleCollisionBox getPossibleLocationCombined() {
+        int interpSteps = getInterpolationSteps();
+
+        double stepMinX = (targetLocation.minX - startingLocation.minX) / (double) interpSteps;
+        double stepMaxX = (targetLocation.maxX - startingLocation.maxX) / (double) interpSteps;
+        double stepMinY = (targetLocation.minY - startingLocation.minY) / (double) interpSteps;
+        double stepMaxY = (targetLocation.maxY - startingLocation.maxY) / (double) interpSteps;
+        double stepMinZ = (targetLocation.minZ - startingLocation.minZ) / (double) interpSteps;
+        double stepMaxZ = (targetLocation.maxZ - startingLocation.maxZ) / (double) interpSteps;
+
+        // Each corner of B(s) is linear in s: c + s * stepDelta. Over the closed integer range
+        // [interpolationStepsLowBound, interpolationStepsHighBound], a linear function attains
+        // its extremes at the endpoints. So the axis-wise union of B(s) for all s in that range
+        // equals the axis-wise union of just B(low) and B(high).
+
+        double loMinX = startingLocation.minX + interpolationStepsLowBound * stepMinX;
+        double loMinY = startingLocation.minY + interpolationStepsLowBound * stepMinY;
+        double loMinZ = startingLocation.minZ + interpolationStepsLowBound * stepMinZ;
+        double loMaxX = startingLocation.maxX + interpolationStepsLowBound * stepMaxX;
+        double loMaxY = startingLocation.maxY + interpolationStepsLowBound * stepMaxY;
+        double loMaxZ = startingLocation.maxZ + interpolationStepsLowBound * stepMaxZ;
+
+        double hiMinX = startingLocation.minX + interpolationStepsHighBound * stepMinX;
+        double hiMinY = startingLocation.minY + interpolationStepsHighBound * stepMinY;
+        double hiMinZ = startingLocation.minZ + interpolationStepsHighBound * stepMinZ;
+        double hiMaxX = startingLocation.maxX + interpolationStepsHighBound * stepMaxX;
+        double hiMaxY = startingLocation.maxY + interpolationStepsHighBound * stepMaxY;
+        double hiMaxZ = startingLocation.maxZ + interpolationStepsHighBound * stepMaxZ;
+
+        return new SimpleCollisionBox(
+                Math.min(loMinX, hiMinX),
+                Math.min(loMinY, hiMinY),
+                Math.min(loMinZ, hiMinZ),
+                Math.max(loMaxX, hiMaxX),
+                Math.max(loMaxY, hiMaxY),
+                Math.max(loMaxZ, hiMaxZ));
+    }
+
+    /**
+     * Builds upon getPossibleLocationCombined() to create a larger bounding box that contains
+     * not just where the entity could be located, but where any part of its hitbox could be.
+     * This is done by:<p>
+     * <p>
+     * 1. Getting the possible locations using getPossibleLocationCombined()<br>
+     * 2. If needed expand appropriately due to a recent teleport that moved the entity by:<br>
+     * • X: 0.03125D<br>
+     * • Y: 0.015625D<br>
+     * • Z: 0.03125D<br>
+     * 3. Expanding by the entity's bounding box dimensions, but only expanding:<br>
+     * • Minimum coordinates by negative bounding box values<br>
+     * • Maximum coordinates by positive bounding box values<p>
+     * <p>
+     * This ensures we have a box containing all possible hitbox positions during interpolation.
+     *
+     * @return A SimpleCollisionBox containing all possible hitbox positions during interpolation
+     */
+    public SimpleCollisionBox getPossibleMovementHitboxCombined() {
+        SimpleCollisionBox minimumInterpLocation = getPossibleLocationCombined();
+        GetBoundingBox.expandBoundingBoxByEntityDimensions(minimumInterpLocation, player, entity);
+        return minimumInterpLocation;
+    }
+
+    public SimpleCollisionBox getPossibleHitboxCombined() {
+        SimpleCollisionBox minimumInterpLocation = getPossibleLocationCombined();
+
+        if (expandNonRelative)
+            minimumInterpLocation.expand(0.03125D, 0.015625D, 0.03125D);
+
+        GetBoundingBox.expandBoundingBoxByEntityDimensions(minimumInterpLocation, player, entity);
+
+        return minimumInterpLocation;
+    }
+
+    public CollisionBox getOverlapHitboxCombined() {
+        int interpSteps = getInterpolationSteps();
+
+        // Calculate step increments for each axis
+        double stepMinX = (targetLocation.minX - startingLocation.minX) / (double) interpSteps;
+        double stepMaxX = (targetLocation.maxX - startingLocation.maxX) / (double) interpSteps;
+        double stepMinY = (targetLocation.minY - startingLocation.minY) / (double) interpSteps;
+        double stepMaxY = (targetLocation.maxY - startingLocation.maxY) / (double) interpSteps;
+        double stepMinZ = (targetLocation.minZ - startingLocation.minZ) / (double) interpSteps;
+        double stepMaxZ = (targetLocation.maxZ - startingLocation.maxZ) / (double) interpSteps;
+
+        // Track the intersection of all expanded hitboxes
+        double overallMinX = Double.NEGATIVE_INFINITY;
+        double overallMaxX = Double.POSITIVE_INFINITY;
+        double overallMinY = Double.NEGATIVE_INFINITY;
+        double overallMaxY = Double.POSITIVE_INFINITY;
+        double overallMinZ = Double.NEGATIVE_INFINITY;
+        double overallMaxZ = Double.POSITIVE_INFINITY;
+
+        boolean isFirstStep = true;
+
+        for (int step = interpolationStepsLowBound; step <= interpolationStepsHighBound; step++) {
+            // Compute interpolated position for this step
+            double currentMinX = startingLocation.minX + (step * stepMinX);
+            double currentMaxX = startingLocation.maxX + (step * stepMaxX);
+            double currentMinY = startingLocation.minY + (step * stepMinY);
+            double currentMaxY = startingLocation.maxY + (step * stepMaxY);
+            double currentMinZ = startingLocation.minZ + (step * stepMinZ);
+            double currentMaxZ = startingLocation.maxZ + (step * stepMaxZ);
+
+            // Create the collision box for this step's position
+            // Create boxes for each bottom corner
+            SimpleCollisionBox[] cornerBoxes = new SimpleCollisionBox[4];
+
+            // Bottom corners: (minX,minY,minZ), (maxX,minY,minZ), (minX,minY,maxZ), (maxX,minY,maxZ)
+            cornerBoxes[0] = new SimpleCollisionBox(currentMinX, currentMinY, currentMinZ,
+                    currentMinX, currentMinY, currentMinZ);
+            cornerBoxes[1] = new SimpleCollisionBox(currentMaxX, currentMinY, currentMinZ,
+                    currentMaxX, currentMinY, currentMinZ);
+            cornerBoxes[2] = new SimpleCollisionBox(currentMinX, currentMinY, currentMaxZ,
+                    currentMinX, currentMinY, currentMaxZ);
+            cornerBoxes[3] = new SimpleCollisionBox(currentMaxX, currentMinY, currentMaxZ,
+                    currentMaxX, currentMinY, currentMaxZ);
+
+            // Expand each corner box by entity dimensions
+            for (SimpleCollisionBox cornerBox : cornerBoxes) {
+                GetBoundingBox.expandBoundingBoxByEntityDimensions(cornerBox, player, entity);
+            }
+
+            // Get the overlap of the 4 corner boxes
+            CollisionBox stepOverlap = getOverlapOfBoxes(cornerBoxes);
+            if (stepOverlap == NoCollisionBox.INSTANCE)
+                return NoCollisionBox.INSTANCE;
+            SimpleCollisionBox stepBox = (SimpleCollisionBox) stepOverlap;
+
+            // Initialize overall bounds with the first expanded box
+            if (isFirstStep) {
+                overallMinX = stepBox.minX;
+                overallMaxX = stepBox.maxX;
+                overallMinY = stepBox.minY;
+                overallMaxY = stepBox.maxY;
+                overallMinZ = stepBox.minZ;
+                overallMaxZ = stepBox.maxZ;
+                isFirstStep = false;
+            } else {
+                // Update bounds to the intersection of all expanded boxes
+                overallMinX = Math.max(overallMinX, stepBox.minX);
+                overallMaxX = Math.min(overallMaxX, stepBox.maxX);
+                overallMinY = Math.max(overallMinY, stepBox.minY);
+                overallMaxY = Math.min(overallMaxY, stepBox.maxY);
+                overallMinZ = Math.max(overallMinZ, stepBox.minZ);
+                overallMaxZ = Math.min(overallMaxZ, stepBox.maxZ);
+            }
+
+            // Early exit if the intersection becomes empty
+            if (overallMinX > overallMaxX || overallMinY > overallMaxY || overallMinZ > overallMaxZ) {
+                return NoCollisionBox.INSTANCE;
+            }
+        }
+
+        // Check if the final intersection is valid
+        if (overallMinX > overallMaxX || overallMinY > overallMaxY || overallMinZ > overallMaxZ) {
+            return NoCollisionBox.INSTANCE;
+        }
+
+        return new SimpleCollisionBox(
+                overallMinX, overallMinY, overallMinZ,
+                overallMaxX, overallMaxY, overallMaxZ
+        );
+    }
+
+    private CollisionBox getOverlapOfBoxes(SimpleCollisionBox[] boxes) {
+        double minX = Double.NEGATIVE_INFINITY;
+        double maxX = Double.POSITIVE_INFINITY;
+        double minY = Double.NEGATIVE_INFINITY;
+        double maxY = Double.POSITIVE_INFINITY;
+        double minZ = Double.NEGATIVE_INFINITY;
+        double maxZ = Double.POSITIVE_INFINITY;
+
+        boolean first = true;
+
+        for (SimpleCollisionBox box : boxes) {
+            if (first) {
+                minX = box.minX;
+                maxX = box.maxX;
+                minY = box.minY;
+                maxY = box.maxY;
+                minZ = box.minZ;
+                maxZ = box.maxZ;
+                first = false;
+            } else {
+                minX = Math.max(minX, box.minX);
+                maxX = Math.min(maxX, box.maxX);
+                minY = Math.max(minY, box.minY);
+                maxY = Math.min(maxY, box.maxY);
+                minZ = Math.max(minZ, box.minZ);
+                maxZ = Math.min(maxZ, box.maxZ);
+            }
+
+            if (minX > maxX || minY > maxY || minZ > maxZ) {
+                return NoCollisionBox.INSTANCE;
+            }
+        }
+
+        return new SimpleCollisionBox(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    public void updatePossibleStartingLocation(SimpleCollisionBox possibleLocationCombined) {
+        //DarknessFreeBukkitLoaderPlugin.staticGetLogger().info(ChatColor.BLUE + "Updated new starting location as second trans hasn't arrived " + startingLocation);
+        this.startingLocation = combineCollisionBox(startingLocation, possibleLocationCombined);
+        //DarknessFreeBukkitLoaderPlugin.staticGetLogger().info(ChatColor.BLUE + "Finished updating new starting location as second trans hasn't arrived " + startingLocation);
+    }
+
+    public void tickMovement(boolean incrementLowBound, boolean tickingReliably) {
+        if (!tickingReliably) this.interpolationStepsHighBound = getInterpolationSteps();
+        if (incrementLowBound)
+            this.interpolationStepsLowBound = Math.min(interpolationStepsLowBound + 1, getInterpolationSteps());
+        this.interpolationStepsHighBound = Math.min(interpolationStepsHighBound + 1, getInterpolationSteps());
+    }
+
+    @Override
+    public String toString() {
+        return "ReachInterpolationData{" +
+                "targetLocation=" + targetLocation +
+                ", startingLocation=" + startingLocation +
+                ", interpolationStepsLowBound=" + interpolationStepsLowBound +
+                ", interpolationStepsHighBound=" + interpolationStepsHighBound +
+                '}';
+    }
+
+    public void expandNonRelative() {
+        expandNonRelative = true;
+    }
+}

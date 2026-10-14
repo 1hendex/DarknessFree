@@ -1,0 +1,50 @@
+package ac.darkness.darkness.checks.impl.misc.interact;
+
+import ac.grim.grimac.api.storage.verbose.Verbose;
+import ac.darkness.darkness.checks.Check;
+import ac.darkness.darkness.checks.CheckData;
+import ac.darkness.darkness.checks.type.BlockBreakListener;
+import ac.darkness.darkness.player.GrimPlayer;
+import ac.darkness.darkness.utils.anticheat.update.BlockBreak;
+import ac.darkness.darkness.utils.collisions.datatypes.SimpleCollisionBox;
+import ac.darkness.darkness.utils.math.Vector3dm;
+import ac.darkness.darkness.utils.math.VectorUtils;
+import com.github.retrooper.packetevents.protocol.attribute.Attributes;
+import com.github.retrooper.packetevents.protocol.player.DiggingAction;
+
+@CheckData(name = "InteractI", alternativeName = "FarBreak", configName = "InteractI", stableKey = "grim.breaking.far_break", description = "Breaking blocks too far away", experimental = true)
+public class InteractI extends Check implements BlockBreakListener {
+    private static final Verbose V = Verbose.of("distance={f64:%.2f}");
+
+    public InteractI(GrimPlayer player) {
+        super(player);
+    }
+
+    @Override
+    public void onBlockBreak(BlockBreak blockBreak) {
+        if (!player.cameraEntity.isSelf() || player.inVehicle() || blockBreak.action == DiggingAction.CANCELLED_DIGGING)
+            return; // falses
+
+        double min = Double.MAX_VALUE;
+        for (double d : player.getPossibleEyeHeights()) {
+            SimpleCollisionBox box = new SimpleCollisionBox(blockBreak.position);
+            Vector3dm best = VectorUtils.cutBoxToVector(player.x, player.y + d, player.z, box);
+            min = Math.min(min, best.distanceSquared(player.x, player.y + d, player.z));
+        }
+
+        // getPickRange() determines this?
+        // With 1.20.5+ the new attribute determines creative mode reach using a modifier
+        double maxReach = player.compensatedEntities.self.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE);
+        if (player.packetStateData.didLastMovementIncludePosition || player.canSkipTicks()) {
+            double threshold = player.getMovementThreshold();
+            maxReach += Math.hypot(threshold, threshold);
+        }
+
+        if (min > maxReach * maxReach) {
+            double distance = Math.sqrt(min);
+            if (flag(V.write(verbose()).f64(distance)) && shouldModifyPackets()) {
+                blockBreak.cancel();
+            }
+        }
+    }
+}

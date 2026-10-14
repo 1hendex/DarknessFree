@@ -1,0 +1,49 @@
+name: Bypass
+description: Report a bypass here
+labels: ["bypass"]
+body:
+  - type: textarea
+    attributes:
+      label: Describe the bypass and how to replicate it
+      description: Provide a video or detailed instructions to help replicate it.
+      placeholder: |
+        Step 1. Do this
+        Step 2. Then do this
+        Step 3. etc...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Grim version
+      description: |
+        Provide the version of Grim running on the server. You can run `/grim version` to check.
+      placeholder: Examples include 2.3.73-8ddd7f1, 2.3.72, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Server version
+      description: |
+        Run `/version` on your server to check. Provide both the server type (ie Paper, Airplane, etc) & the Minecraft version.
+      placeholder: Paper 1.21.11
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Client version
+      description: |
+        Provide the version of your Minecraft client. Also provide the protocol version if changed.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Plugins/Mods
+      description: |
+        List all plugins or mods installed on your server. To list plugins on Bukkit-based servers, run `/plugins`.
+        If your server is behind a proxy such as Bungeecord, you should list the proxy's plugins as well.
+    validations:
+      required: true

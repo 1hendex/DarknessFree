@@ -1,0 +1,228 @@
+# \u00BB это " (двойной >>), ANSI и UTF-8 интерпретируют это по-разному... вы можете даже увидеть "?" из-за этого
+prefix: "&x&8&8&0&0&0&0&l&oD&x&A&C&0&2&0&2&l&oa&x&C&F&0&4&0&4&l&or&x&E&F&0&3&0&3&l&ok&x&D&E&0&2&0&2&l&on&x&9&C&0&0&0&0&l&oe&x&7&D&0&0&0&0&l&os&x&6&A&0&0&0&0&l&os §8|"
+
+alerts-enabled: "%prefix% &fОповещения включены"
+alerts-disabled: "%prefix% &fОповещения отключены"
+verbose-enabled: "%prefix% &fVerbose enabled"
+verbose-disabled: "%prefix% &fVerbose disabled"
+brands-enabled: "%prefix% &fBrands enabled"
+brands-disabled: "%prefix% &fBrands disabled"
+client-brand-format: "%prefix% &f%player% присоединился, используя %brand%"
+console-specify-target: "%prefix% &cВы должны указать цель в качестве консоли!"
+reloading: "%prefix% &7Reloading config..."
+reloaded: "%prefix% &fConfig has been reloaded."
+reload-failed: "%prefix% &cFailed to reload config."
+player-not-found: "%prefix% &cИгрок исключен или находится вне сети!"
+player-not-this-server: "%prefix% &cИгрок не находится на этом сервере!"
+sender-not-found: "%prefix% &cВы не можете использовать эту команду, если у вас есть исключение!"
+spectate-return: "<click:run_command:/darkness stopspectating><hover:show_text:\"/darkness stopspectating\">\n%prefix% &fНажмите здесь, чтобы вернуться на предыдущее место\n</hover></click>"
+cannot-spectate-return: "%prefix% &cВы можете сделать это только после наблюдения за игроком"
+cannot-run-on-self: "%prefix% &cВы не можете использовать эту команду на себе!"
+upload-log: "%prefix% &fОтладка была загружена на: %url%"
+upload-log-start: "%prefix% &fЗагрузка журнала... пожалуйста, подождите"
+upload-log-not-found: "%prefix% &cНевозможно найти этот журнал"
+upload-log-upload-failure: "%prefix% &cЧто-то пошло не так при загрузке этого журнала, смотрите консоль для получения дополнительной информации"
+disconnect:
+    timeout: "<lang:disconnect.timeout>"
+    closed: "<lang:disconnect.closed>"
+    error: "<red>An error occurred whilst processing packets. Please contact the administrators."
+    blacklisted-forge: "<red>Your forge version is blacklisted due to inbuilt reach hacks.<newline><gold>Versions affected: 1.18.2-1.19.3<newline><newline><red>Please see https://github.com/MinecraftForge/MinecraftForge/issues/9309."
+run-as-player: "%prefix% &cЭту команду могут использовать только игроки!"
+run-as-player-or-console: "%prefix% &cЭту команду могут использовать только игроки или консоль!"
+webhook-not-enabled: "Discord webhooks are not enabled!"
+webhook-test-message: "test message"
+webhook-test-succeeded: "Discord webhook test succeeded!"
+webhook-test-failed: "Discord webhook test failed!"
+
+bar:
+    opening_bracket: '&8['
+    closing_bracket: '&8]'
+    fill: '&f|'
+    empty: '&7|'
+    size: 18
+
+# Допустимые заполнители:
+# %prefix%
+# %player%
+# %check%
+# %check_name%
+# %check_type%
+# %trust_color%
+# %trust_name%
+# %max_vl%
+# %description%
+# %information%
+# %version%
+# %ping%
+# %tps%
+# %experimental%
+# %vl% - нарушения
+# %bar% - нарушения в виде полосы
+# %verbose% - дополнительная информация от проверки, например, смещения, не все проверки добавляют информацию.
+alerts_format: "%prefix% &c%player% &7провалил &c%check_name%%experimental% &7(x&c%bar%&7)"
+alerts-format: "%prefix% &c%player% &7провалил &c%check_name%%experimental% &7(x&c%bar%&7)"
+alerts_format_console: "%prefix% &c%player% &7провалил &c%check_name%%experimental% &7(x&c%vl%&7) &c%verbose%"
+alerts-format-console: "%prefix% &c%player% &7провалил &c%check_name%%experimental% &7(x&c%vl%&7) &c%verbose%"
+alerts_format_proxy: "%prefix% &f[&cPROXY&f] &f%player% &7провалил &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cPROXY&f] &f%player% &7провалил &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+experimental_symbol: " (Experimental)"
+experimental-symbol: " (Experimental)"
+
+alert_hover_enabled: true
+alert_hover_command: "/darkness spectate %player%"
+alert_hover:
+    - '&7Описание:&r'
+    - '&c%description%'
+    - ' '
+    - '&7Информация:&r'
+    - '&c%information%'
+    - ' '
+    - '&7Версия: &c%version%'
+    - ' '
+    - '&7Ping: &c&r%ping%'
+    - ' '
+    - '&7TPS: &c&r%tps%'
+    - ' '
+    - '&cНажмите, чтобы начать слежку'
+
+profile:
+  - ' '
+  - '%prefix%'
+  - ' '
+  - '&8» &7Профиль игрока: &f%player%'
+  - '&8» &7Состояние лага: &f%lagstatus%'
+  - '&8» &7Пинг: &f%ping%'
+  - '&8» &7Версия: &f%version%'
+  - '&8» &7Клиент: &f%brand%'
+  - '&8» &7Горизонтальная чувствительность: &f%h_sensitivity%%'
+  - '&8» &7Вертикальная чувствительность: &f%v_sensitivity%%'
+  - '&8» &7Быстрая математика: &f%fast_math%'
+  - ' '
+
+profile_command:
+  - ' '
+  - '%prefix%'
+  - ' '
+  - '&8» &7Профиль игрока: &f%player%'
+  - '&8» &7Состояние лага: &f%lagstatus%'
+  - '&8» &7Пинг: &f%ping%'
+  - '&8» &7Версия: &f%version%'
+  - '&8» &7Клиент: &f%brand%'
+  - '&8» &7Горизонтальная чувствительность: &f%h_sensitivity%%'
+  - '&8» &7Вертикальная чувствительность: &f%v_sensitivity%%'
+  - '&8» &7Быстрая математика: &f%fast_math%'
+  - ' '
+
+help:
+  - ' '
+  - '%prefix% &7Список доступных команд Darkness'
+  - ' '
+  - '&8» &c/darkness alerts &f- &7Включить/выключить оповещения.'
+  - '&8» &c/darkness brands &f- &7Переключить отображение клиентских брендов.'
+  - '&8» &c/darkness profile <player> &f- &7Посмотреть информацию об игроке.'
+  - '&8» &c/darkness help &f- &7Просмотр списка доступных команд.'
+  - '&8» &c/darkness checks &f- &7Посмотреть все активные проверки Darkness.'
+  - '&8» &c/darkness debug <player> &f- &7Отладка с прогнозом разработчика.'
+  - '&8» &c/darkness perf &f- &7Показатель производительности (ms/prediction).'
+  - '&8» &c/darkness reload &f- &7Перезагрузить конфигурацию.'
+  - '&8» &c/darkness spectate <player> &f- &7Слежка за игроком.'
+  - '&8» &c/darkness verbose &f- &7Показ всех флагов без буферов.'
+  - '&8» &c/darkness log [0-255] &f- &7Загрузить журнал отладки флагов.'
+  - '&8» &c/darkness history <player> &f- &7История нарушений и сессий игрока.'
+  - ' '
+
+checks_command:
+  space: ' '
+  type_space: ' '
+  type: "&8» &7Категория проверки: &f%checkType%"
+  not_found_total: "&8» &cПроверки не найдены."
+  not_found_type: "&8» &cОтсутствуют."
+  separator: "&7, "
+  check_not_found: "%prefix% &cЧек &7'%check%' &cне найден!"
+  check_enabled: "%prefix% &fЧек &a%check% &fбыл &aвключен&f!"
+  check_disabled: "%prefix% &fЧек &c%check% &fбыл &cвыключен&f!"
+  check_already_enabled: "%prefix% &fЧек &a%check% &fуже &aвключен&f!"
+  check_already_disabled: "%prefix% &fЧек &c%check% &fуже &cвыключен&f!"
+  check:
+    enabled: "&a%checkName%%experimental%"
+    disabled: "&c%checkName%%experimental%"
+    exempted: "&e%checkName%%experimental%"
+
+
+# === /grim history ===
+# UI истории на основе сессий. Все строки ниже являются настраиваемыми
+# шаблонами MiniMessage. Ховеры по умолчанию находятся в inline-тегах
+# <hover:show_text:'...'> и ключах hover-фрагментов ниже; удалите inline-hover,
+# чтобы использовать fallback рендерера.
+
+grim-history-load-failure: "%prefix% &cНе удалось загрузить подсистему истории! Проверьте консоль сервера на наличие ошибок."
+grim-history-disabled: "%prefix% &cПодсистема истории отключена!"
+grim-history-failed: "%prefix% &cНе удалось загрузить историю: &7%error%"
+grim-history-unknown-player: "%prefix% &cНеизвестный игрок: &f%player%"
+grim-history-no-sessions: "%prefix% &7Нет истории сессий для &f%player%&7."
+grim-history-session-not-found: "%prefix% &cСессия &f%ordinal%&c не найдена для &f%player%&c."
+
+# Список сессий — допустимые плейсхолдеры: %prefix% %player% %page% %max_pages%
+grim-history-header: "%prefix% &bИстория сессий для &f%player% &8[&f%page%&7/&f%max_pages%&8]"
+# Сводная строка одной сессии — допустимые плейсхолдеры:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %crashed_marker% %session_uuid% %detail_command%
+# %crashed_marker% разворачивается в grim-history-crashed-marker для сессий,
+# чьё соединение оборвалось без штатного закрытия (краш сервера, kill -9,
+# RST канала, не вызвавший UserDisconnectEvent). Для активных или штатно
+# закрытых сессий — пустая строка.
+grim-history-session: "<hover:show_text:'&bСессия &7%session_uuid%<newline>&7Нажмите или выполните &e%detail_command%<newline>&7чтобы посмотреть детали сессии.'>%prefix% &8[&b%grim_version%&8] &8[&b%server_name%&8] &8[&b%client_version%&8] &bСессия &f%ordinal%&b, длительность &f%duration%&b, нарушений &c%violations%&b &8[&c%unique_checks%&8]%crashed_marker% &8(&7%timeago% назад&8)</hover>"
+
+# Встроенный маркер, подставляемый в %crashed_marker% для сессий с
+# closed_at == last_activity (то есть проставленных при следующем запуске
+# crash-sweep'ом, а не путём штатного дисконнекта). Содержит ведущий
+# пробел: при наличии маркер читается естественно, при отсутствии чисто
+# исчезает.
+grim-history-crashed-marker: " &8(&cкраш&8)"
+
+# Детали сессии — допустимые плейсхолдеры:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %bucket_size%
+grim-history-detail-header: "%prefix% &bДетали сессии &f%ordinal% &bигрока &f%player%&b:"
+grim-history-detail-meta1: "%prefix% &bDarknessFree: &f%grim_version%&b, сервер: &f%server_name%&b, длительность: &f%duration%&b, дата: &7%timeago% назад"
+grim-history-detail-meta2: "%prefix% &bКлиент: &f%client_version%&b, бренд: &f%client_brand%"
+grim-history-detail-violations-header: "%prefix% &bНарушения: &8(всего %violations%, уникальных %unique_checks%)"
+grim-history-detail-empty: "%prefix% &7- (нет)"
+# Сгруппированная строка (по умолчанию) — допустимые плейсхолдеры: %prefix% %offset% %checks_list%
+#   %bucket_start% %bucket_end% %bucket_hover_entries%
+#   %checks_list% строится склейкой записей grim-history-check-count через ", "
+grim-history-detail-group: "<hover:show_text:'&bНарушения за &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%'>%prefix% &7- %checks_list% &8(&b%offset%&8)</hover>"
+grim-history-detail-group-hover: "&bНарушения за &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%"
+grim-history-detail-group-hover-entry: "<newline>&8  %offset% &b%check%%description%%verbose%"
+grim-history-hover-description: " — &f%description%"
+grim-history-detail-group-hover-verbose: " — &7%verbose%"
+# Одиночная строка нарушения (--detailed) — допустимые плейсхолдеры:
+#   %prefix% %offset% %check% %description% %vl% %verbose%
+grim-history-detail-entry: "%prefix% &7- &f%check% &8(&b%offset%&8)&7 %verbose%"
+grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% — vl %vl%%verbose%"
+grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
+# Внутренний формат каждой записи в %checks_list% — допустимые плейсхолдеры: %check_name% %count%
+grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+checks_command:
+  space: ' '
+  type_space: ' '
+  type: "&8» &7Категория проверки: &f%checkType%"
+  not_found_total: "&8» &cПроверки не найдены."
+  not_found_type: "&8» &cОтсутствуют."
+  separator: "&7, "
+  check_not_found: "%prefix% &cЧек &7'%check%' &cне найден!"
+  check_enabled: "%prefix% &fЧек &a%check% &fбыл &aвключен&f!"
+  check_disabled: "%prefix% &fЧек &c%check% &fбыл &cвыключен&f!"
+  check_already_enabled: "%prefix% &fЧек &a%check% &fуже &aвключен&f!"
+  check_already_disabled: "%prefix% &fЧек &c%check% &fуже &cвыключен&f!"
+  check:
+    enabled: "&a%checkName%%experimental%"
+    disabled: "&c%checkName%%experimental%"
+    exempted: "&e%checkName%%experimental%"
+
+# Маркеры схемы — см. шапку config.yml.
+config-flavor: V2
+config-version: 2

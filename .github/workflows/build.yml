@@ -1,0 +1,91 @@
+name: Build & Release DarknessFree
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Release DarknessFree
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Compute version
+        id: version
+        run: |
+          VERSION=$(./gradlew printVersion | grep '^VERSION=' | tail -n1 | cut -d'=' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Computed version: $VERSION"
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Upload Bukkit Plugin Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarknessFree-bukkit
+          path: |
+            bukkit/build/libs/DarknessFree-bukkit-*.jar
+            !bukkit/build/libs/*-sources.jar
+            !bukkit/build/libs/*-javadoc.jar
+          if-no-files-found: error
+
+      - name: Upload Fabric Mod Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarknessFree-fabric
+          path: |
+            fabric/build/libs/DarknessFree-fabric-*.jar
+            !fabric/build/libs/*-sources.jar
+            !fabric/build/libs/*-javadoc.jar
+          if-no-files-found: warn
+
+      - name: Publish GitHub Release
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && github.repository_owner == '1hendex'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', env.VERSION) }}
+          name: DarknessFree ${{ env.VERSION }}
+          body: |
+            Automatic release from commit: ${{ github.sha }}
+
+            Full version of Darkness at https://darkness.rip
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: |
+            bukkit/build/libs/DarknessFree-bukkit-*.jar
+            !bukkit/build/libs/*-sources.jar
+            !bukkit/build/libs/*-javadoc.jar
+            fabric/build/libs/DarknessFree-fabric-*.jar
+            !fabric/build/libs/*-sources.jar
+            !fabric/build/libs/*-javadoc.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

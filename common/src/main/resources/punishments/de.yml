@@ -1,0 +1,288 @@
+# %check_name% - Name der PrГјfung
+# %description% - description of the check
+# %vl% - VerstГ¶Гџe
+# %verbose% - zusГ¤tzliche Informationen
+# %player% - Spielername
+# [alert] - spezieller Befehl zur Alarmierung
+# [webhook] - spezieller Befehl fГјr die Alarmierung an den Discord-Webhook
+# [proxy] - spezieller Befehl zur Alarmierung anderer Server, die mit Ihrem Proxy verbunden sind (BungeeCord/Velocity)
+Punishments:
+  Interpolation:
+    # After how many seconds should a violation be removed?
+    remove-violations-after: 300
+    # This section will match all checks with the name,
+    # To exclude a check that would otherwise be matched, put an exclamation mark in front of the name
+    # For example, !BadPacketsN
+    checks:
+      - "Interpolation"
+      - "Simulation"
+    # Threshold:Interval Command
+    #
+    # N is the active violation count required to run the command.
+    # Active violations are counted inside the remove-violations-after window.
+    # M > 0 runs at N, then N+M, N+2M, ...
+    # M = 0 runs once when N is reached.
+    #
+    # Examples:
+    # - "100:0 kick %player% incorrect movement!"   fires once on flag 100
+    # - "100:50 say %player% is cheating"           fires on flags 100, 150, 200, ...
+    # - "5:3 [alert]"                               fires on flags 5, 8, 11, 14, ...
+    #
+    commands:
+      - "100:40 [alert]"
+      - "1:1 [log]"
+      - "100:100 [webhook]"
+      - "100:100 [proxy]"
+  Phase:
+    remove-violations-after: 300
+    checks:
+      - "Phase"
+    commands:
+      - "10:5 [alert]"
+      - "1:1 [log]"
+      - "20:10 [webhook]"
+      - "20:10 [proxy]"
+  Velocity:
+    remove-violations-after: 300
+    checks:
+      - "Velocity"
+      - "Knockback"
+      - "Explosion"
+    commands:
+      - "5:5 [alert]"
+      - "1:1 [log]"
+      - "20:20 [webhook]"
+      - "20:20 [proxy]"
+  Protocol:
+    remove-violations-after: 300
+    checks:
+      - "Protocol"
+    commands:
+      - "20:20 [alert]"
+      - "1:1 [log]"
+      - "40:40 [webhook]"
+      - "40:40 [proxy]"
+  BadPackets:
+    remove-violations-after: 300
+    checks:
+      - "BadPackets"
+    commands:
+      - "20:20 [alert]"
+      - "1:1 [log]"
+      - "40:40 [webhook]"
+      - "40:40 [proxy]"
+  Crash:
+    remove-violations-after: 360
+    checks:
+      - "Crash"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "1:3 [webhook]"
+      - "1:3 [proxy]"
+  Inventory:
+    remove-violations-after: 300
+    checks:
+      - "Inventory"
+    commands:
+      - "10:10 [alert]"
+      - "10:10 [log]"
+      - "20:20 [webhook]"
+      - "20:20 [proxy]"
+  Reach:
+    remove-violations-after: 300
+    checks:
+      - "Reach"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "1:1 [webhook]"
+      - "1:1 [proxy]"
+  Hitboxes:
+    remove-violations-after: 300
+    checks:
+      - "Hitboxes"
+    commands:
+      - "5:3 [alert]"
+      - "1:1 [log]"
+      - "5:3 [webhook]"
+      - "5:3 [proxy]"
+  WallHit:
+    remove-violations-after: 300
+    checks:
+      - "WallHit"
+    commands:
+      - "10:5 [alert]"
+      - "10:5 [webhook]"
+      - "10:5 [proxy]"
+      - "10:5 [log]"
+  EntityPierce:
+    remove-violations-after: 300
+    checks:
+      - "EntityPierce"
+    commands:
+      - "15:10 [alert]"
+      - "15:10 [webhook]"
+      - "15:10 [proxy]"
+      - "15:10 [log]"
+  KillAura:
+    remove-violations-after: 250
+    checks:
+      - "KillAura"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "3:2 [webhook]"
+      - "3:1 [proxy]"
+  Aim:
+    remove-violations-after: 250
+    checks:
+      - "Aim"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "3:2 [webhook]"
+      - "3:1 [proxy]"
+  Analysis:
+    remove-violations-after: 250
+    checks:
+      - "Analysis"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "3:2 [webhook]"
+      - "3:1 [proxy]"
+  Sprint:
+    remove-violations-after: 250
+    checks:
+      - "Sprint"
+    commands:
+      - "5:5 [alert]"
+      - "1:1 [log]"
+      - "10:10 [webhook]"
+      - "10:10 [proxy]"
+  Elytra:
+    remove-violations-after: 250
+    checks:
+      - "Elytra"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "2:2 [webhook]"
+      - "2:2 [proxy]"
+  Scaffold:
+    remove-violations-after: 180
+    checks:
+      - "Place"
+      - "Scaffold"
+    commands:
+      - "1:2 [alert]"
+      - "1:1 [log]"
+      - "2:2 [webhook]"
+      - "2:2 [proxy]"
+  Break:
+    remove-violations-after: 180
+    checks:
+      - "Break"
+    commands:
+      - "1:2 [alert]"
+      - "1:1 [log]"
+      - "2:2 [webhook]"
+      - "2:2 [proxy]"
+  MultiActions:
+    remove-violations-after: 250
+    checks:
+      - "MultiActions"
+    commands:
+      - "1:2 [alert]"
+      - "1:1 [log]"
+      - "2:2 [webhook]"
+      - "2:2 [proxy]"
+  Vehicle:
+    remove-violations-after: 300
+    checks:
+      - "Vehicle"
+    commands:
+      - "5:5 [alert]"
+      - "1:1 [log]"
+      - "10:10 [webhook]"
+      - "10:10 [proxy]"
+  NoSlow:
+    remove-violations-after: 250
+    checks:
+      - "NoSlow"
+    commands:
+      - "5:5 [alert]"
+      - "1:1 [log]"
+      - "10:10 [webhook]"
+      - "5:5 [proxy]"
+  NoFall:
+    remove-violations-after: 300
+    checks:
+      - "NoFall"
+    commands:
+      - "6:4 [alert]"
+      - "1:1 [log]"
+      - "6:4 [webhook]"
+      - "6:4 [proxy]"
+  Timer:
+    remove-violations-after: 70
+    checks:
+      - "Timer"
+    commands:
+      - "1:5 [alert]"
+      - "1:1 [log]"
+      - "2:5 [webhook]"
+      - "1:1 [proxy]"
+  Chat:
+    remove-violations-after: 300
+    checks:
+      - "Chat"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "1:1 [webhook]"
+      - "1:1 [proxy]"
+  Exploit:
+    remove-violations-after: 360
+    checks:
+      - "Exploit"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "1:3 [webhook]"
+      - "1:3 [proxy]"
+  Interact:
+    remove-violations-after: 300
+    checks:
+      - "Interact"
+    commands:
+      - "5:5 [alert]"
+      - "1:1 [log]"
+      - "5:5 [webhook]"
+      - "5:5 [proxy]"
+  Baritone:
+    remove-violations-after: 500
+    checks:
+      - "Baritone"
+    commands:
+      - "1:1 [alert]"
+      - "1:1 [log]"
+      - "1:1 [webhook]"
+      - "1:1 [proxy]"
+  Autoclicker:
+    remove-violations-after: 300
+    checks:
+      - "Autoclicker"
+    commands:
+      - "20:40 [alert]"
+      - "1:1 [log]"
+  FreeCam:
+    remove-violations-after: 300
+    checks:
+      - "FreeCam"
+    commands:
+      - "20:20 [alert]"
+      - "1:1 [log]"
+      - "40:40 [webhook]"
+      - "40:40 [proxy]"
